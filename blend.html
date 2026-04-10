@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" /><title>Fixing Gmail’s dark mode issues with CSS Blend Modes — HTeuMeuLeu.com</title>
+	<link rel="stylesheet" href="/assets/css/styles.css" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://www.hteumeuleu.com/2021/fixing-gmail-dark-mode-css-blend-modes/" />
+	<link href="https://www.hteumeuleu.com/feed.xml" rel="alternate" type="application/atom+xml" />
+	<meta name="supported-color-schemes" content="light dark" />
+	<link rel="me" href="https://mastodon.social/@HTeuMeuLeu" />
+</head>
+<body>
+	<div class="page page--default">
+		<header class="header" role="banner"><a href="/" class="title"><img class="logo" src="https://www.hteumeuleu.com/assets/images/avatar.webp" alt="HTeuMeuLeu" width="96" height="96" /></a><nav class="nav" role="navigation">
+				<a href="/about/">About</a>
+				<a href="/blog/" class="current">Blog</a>
+				<a href="/work/">Work with me</a>
+			</nav>
+		</header>
+		<main role="main" class="main">
+			<div class="post">
+	<header class="post-header">
+		<p class="post-date"><time datetime="2021-04-09T00:00:00+00:00">April 09, 2021</time></p>
+		<h1 class="post-title">Fixing Gmail’s dark mode issues with CSS Blend Modes
+</h1>
+		
+	</header>
+	<p>Since its debut in october 2019, Gmail’s dark mode has been causing <a href="https://github.com/hteumeuleu/email-bugs/issues/68">a lot of headaches</a>. It has improved and standardized over time, but there are still glaring differences between Gmail’s dark mode in iOS versus Android.</p>
+
+<p>One of the most inconvenient problem in iOS in particular is that Gmail insists on changing any light text color to a dark text color. So an already dark email with white text on a black background will turn black on white. Not only does that seem counter-efficient, but it also creates real accessibility and readibility issues.</p>
+
+<p>Take <a href="https://reallygoodemails.com/emails/black-friday-deals-are-here">this email from Nest</a> for example.</p>
+
+<figure class="figure--grid">
+    <img alt="" src="/uploads/2021/04/nest-email-gmail-light-mode.png" width="375" height="667" />
+    <img alt="" src="/uploads/2021/04/nest-email-gmail-dark-mode.png" width="375" height="667" />
+    <figcaption>A screenshot of an already dark email from Nest in Gmail iOS in light mode (left) and dark mode (right). In dark mode, the already dark background colors are turned into light colors. The white text “Nest” included in the logo image becomes almost invisible in dark mode.</figcaption>
+</figure>
+
+<p>I’ve been thinking for a while about how to solve this. And CSS blend modes have been in my mind <a href="https://twitter.com/HTeuMeuLeu/status/784480676246593537">ever since they’ve been supported in Gmail</a>. So here’s how to fix (some of) Gmail’s dark mode issues with CSS Blend Modes.</p>
+
+<h2 id="1-the-base-code">1. The base code</h2>
+
+<p>For this example, we’ll start by using a single <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code> with a black background and white text.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; color:#fff;"</span><span class="nt">&gt;</span>
+    Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="2-how-gmail-transforms-colors">2. How Gmail transforms colors</h2>
+
+<p>If you open an email with the code above in Gmail iOS in dark mode, you’ll see that the colors have been changed. It’s never been clear to me how Gmail <em>actually</em> proceeds to do these color changes. (You still get your original colors if you try to copy and paste the email or if you forward it.) But the end result would be similar to the code below.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; color:#000;"</span><span class="nt">&gt;</span>
+    Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="3-adding-blend-modes-in-the-mix">3. Adding blend modes in the mix</h2>
+
+<p>Let’s go back to our initial code and let the magic of blend modes begin. We will add two inner <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code> containers, each with a black background and a different blending mode.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; color:#fff;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>And as our final trick, we’ll use a background image created with a <code class="language-plaintext highlighter-rouge">linear-gradient</code> in CSS to maintain our desired background color. (I learnt this hack from <a href="https://twitter.com/The_Annett">Annett Forcier</a> during <a href="https://www.emailonacid.com/resource/webinar-dark-mode-email-design/">her dark mode webinar</a> with <a href="https://twitter.com/pompeii79">Anne Tomlin</a> last year.)</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; background-image:linear-gradient(#000,#000); color:#fff;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Let’s see step by step how this is processed in Gmail iOS and why this works.</p>
+
+<h3 id="31-how-gmail-changes-this-code">3.1 How Gmail changes this code</h3>
+
+<p>First, Gmail will change the colors. White text will turn into black and black backgrounds will turn into white, except for the <code class="language-plaintext highlighter-rouge">linear-gradient</code> one. So our code will end up to something like this.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; background-image:linear-gradient(#000,#000); color:#000;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h3 id="32-blend-modes">3.2 Blend modes</h3>
+
+<p>Let’s talk about blend modes. <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode">Per definition</a>:</p>
+
+<blockquote>
+  <p><em>A blend mode describes how colors should appear when elements overlap.</em></p>
+</blockquote>
+
+<p>A blend operation takes a “<em>source color</em>” and blends it with a “<em>backdrop color</em>”. The exact result depends on the type of blend mode we use.</p>
+
+<p>We can use blend modes <a href="https://helpx.adobe.com/photoshop/using/blending-modes.html">in Photoshop</a>. And we can use blend modes in CSS thanks to two properties: <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/background-blend-mode"><code class="language-plaintext highlighter-rouge">background-blend-mode</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/mix-blend-mode"><code class="language-plaintext highlighter-rouge">mix-blend-mode</code></a>. Both are <a href="https://www.caniemail.com/search/?s=blend-mode">equally supported in Gmail</a>. But because our primary goal here is to maintain text color, we’ll only use <code class="language-plaintext highlighter-rouge">mix-blend-mode</code>.</p>
+
+<p><a href="https://www.caniemail.com/features/css-mix-blend-mode/"><img src="https://screenshots.caniemail.com/css-mix-blend-mode.png" alt="Can I email… mix-blend-mode" width="640" height="400" style="vertical-align:middle; border:0; max-width:100%; height:auto;" /></a></p>
+
+<p>If you want to learn more about blend modes in CSS, I highly recommend to read the following articles:</p>
+
+<ul>
+  <li><a href="https://ishadeed.com/article/blending-modes-css/">Blending Modes in CSS</a>, by Ahmad Shadeed</li>
+  <li><a href="https://www.sarasoueidan.com/blog/compositing-and-blending-in-css/">Compositing And Blending In CSS</a>, by Sara Soueidan</li>
+  <li><a href="https://css-tricks.com/taming-blend-modes-difference-and-exclusion/">Taming Blend Modes: <code class="language-plaintext highlighter-rouge">difference</code> and <code class="language-plaintext highlighter-rouge">exclusion</code> </a>, by Ana Tudor</li>
+</ul>
+
+<h3 id="33-the-first-blend-difference">3.3 The first blend: <code class="language-plaintext highlighter-rouge">difference</code></h3>
+
+<p>The first blend that occurs in our code is a <code class="language-plaintext highlighter-rouge">difference</code>. By the <a href="https://drafts.fxtf.org/compositing-1/#valdef-blend-mode-difference">W3C specification</a> definition, a <code class="language-plaintext highlighter-rouge">difference</code> blend mode “<em>subtracts the darker of the two constituent colors from the lighter color</em>”. Mathematically, the result is the absolute value of the difference between our source color (<code class="language-plaintext highlighter-rouge">Cs</code>) and our backdrop color (<code class="language-plaintext highlighter-rouge">Cb</code>).</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">B</span><span class="p">(</span><span class="nx">Cb</span><span class="p">,</span> <span class="nx">Cs</span><span class="p">)</span> <span class="o">=</span> <span class="o">|</span><span class="nx">Cb</span> <span class="o">-</span> <span class="nx">Cs</span><span class="o">|</span>
+</code></pre></div></div>
+
+<p>If we get back to our code, this blend mode will occur between our black text on a white background (as transformed by Gmail) and its parent white background.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+        Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Mathematically, this means that our black text from the source becomes…</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">|</span><span class="nx">Cb</span> <span class="o">-</span> <span class="nx">Cs</span><span class="o">|</span> <span class="o">=</span> <span class="o">|</span><span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">|</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>…white! And the white background from that source blended with the white background from the backdrop becomes…</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">|</span><span class="nx">Cb</span> <span class="o">-</span> <span class="nx">Cs</span><span class="o">|</span> <span class="o">=</span> <span class="o">|</span><span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span><span class="o">|</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>…black!</p>
+
+<p>Perfect! But wait, what happens if this applies in Gmail in light mode?</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; color:#fff; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+        Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Our white text source blended with the black backdrop becomes…</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">|</span><span class="nx">Cb</span> <span class="o">-</span> <span class="nx">Cs</span><span class="o">|</span> <span class="o">=</span> <span class="o">|</span><span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span><span class="o">|</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>…white! And our black background source blended with the black backdrop becomes…</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">|</span><span class="nx">Cb</span> <span class="o">-</span> <span class="nx">Cs</span><span class="o">|</span> <span class="o">=</span> <span class="o">|</span><span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">|</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>…black! It still works! But wait again, aren’t we done here? If all you need is white text on a black background, you can indeed stop right there. But if you need white text on a colored background, we’re going to need that second blend.</p>
+
+<h3 id="34-the-second-blend-screen">3.4 The second blend: <code class="language-plaintext highlighter-rouge">screen</code></h3>
+
+<p>Let’s go back a bit and start again with a white text on a purple background (<code class="language-plaintext highlighter-rouge">#639</code>).</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#639; background-image:linear-gradient(#639,#639); color:#fff;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>First, Gmail will change those colors. Black becomes white, white becomes black, and the purple becomes a slightly lighter purple.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#c7a4ef; background-image:linear-gradient(#639,#639); color:#000;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#fff; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Then, the first blend (<code class="language-plaintext highlighter-rouge">difference</code>) applies. But at this stage, we’ll get the exact same result as before: a white text on a black background.</p>
+
+<p>Thus enters our second blend: <code class="language-plaintext highlighter-rouge">screen</code>. By the <a href="https://drafts.fxtf.org/compositing-1/#blendingscreen">W3C specification</a> definition, a <code class="language-plaintext highlighter-rouge">screen</code> blend mode “<em>multiplies the complements of the backdrop and source color values, then complements the result</em>”. Yeah, I didn’t get that either. But the maths here helped me to make sense of it.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">B</span><span class="p">(</span><span class="nx">Cb</span><span class="p">,</span> <span class="nx">Cs</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">[(</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">Cb</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">Cs</span><span class="p">)]</span>
+          <span class="o">=</span> <span class="nx">Cb</span> <span class="o">+</span> <span class="nx">Cs</span> <span class="o">-</span> <span class="p">(</span><span class="nx">Cb</span> <span class="o">*</span> <span class="nx">Cs</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>So let’s see how this goes. At this stage, it’s just as if we’d blend a white text color on a black background with our purple backdrop.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#639;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; color:#fff; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Our white text source (<code class="language-plaintext highlighter-rouge">Cs</code>) blended with the purple backdrop (<code class="language-plaintext highlighter-rouge">Cb</code>) becomes…</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">B</span><span class="p">(</span><span class="nx">Cb</span><span class="p">,</span> <span class="nx">Cs</span><span class="p">)</span> <span class="o">=</span> <span class="nx">Cb</span> <span class="o">+</span> <span class="nx">Cs</span> <span class="o">-</span> <span class="p">(</span><span class="nx">Cb</span> <span class="o">*</span> <span class="nx">Cs</span><span class="p">)</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="o">+</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="o">*</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">))</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="o">+</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>…white! And our black background source blended with the purple backdrop becomes…</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">B</span><span class="p">(</span><span class="nx">Cb</span><span class="p">,</span> <span class="nx">Cs</span><span class="p">)</span> <span class="o">=</span> <span class="nx">Cb</span> <span class="o">+</span> <span class="nx">Cs</span> <span class="o">-</span> <span class="p">(</span><span class="nx">Cb</span> <span class="o">*</span> <span class="nx">Cs</span><span class="p">)</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="o">+</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="o">*</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="o">+</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+          <span class="o">=</span> <span class="nx">rgb</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>…purple! And voilà, this is how you maintain a white text on any background color. And this also works with background images.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#6db6b0; background-image:url(https://i.imgur.com/F7S1NGq.jpg); background-size:cover; color:#fff;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:screen;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#000; mix-blend-mode:difference;"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>The only problem here is that this code would apply to any email client. And for those that don’t support <code class="language-plaintext highlighter-rouge">mix-blend-mode</code>, only the black background would show. We need to make sure that this code only applies in Gmail.</p>
+
+<h2 id="4-targeting-gmail">4. Targeting Gmail</h2>
+
+<p>The hack to target Gmail has been well known for years (and is referenced on <a href="https://howtotarget.email/">HowToTarget.email</a>). There are two requirements for it to work:</p>
+
+<ol>
+  <li>Have a doctype at the top of your HTML code (ex: <code class="language-plaintext highlighter-rouge">&lt;!DOCTYPE html&gt;</code>)</li>
+  <li>Add a dedicated class to the <code class="language-plaintext highlighter-rouge">&lt;body&gt;</code> element (ex: <code class="language-plaintext highlighter-rouge">&lt;body class="body"&gt;</code>)</li>
+</ol>
+
+<p>Then you can target any class name in your code (ex: <code class="language-plaintext highlighter-rouge">.foo</code>) with the selector below:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">u</span> <span class="o">+</span> <span class="nc">.body</span> <span class="nc">.foo</span> <span class="p">{</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>The reason this works is because Gmail replaces the doctype of an email with a <code class="language-plaintext highlighter-rouge">&lt;u&gt;&lt;/u&gt;</code> element. So the base email code below…</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>An HTML email<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;style&gt;u</span> <span class="o">+</span> <span class="nc">.body</span> <span class="nc">.text</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span><span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body</span> <span class="na">class=</span><span class="s">"body"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"text"</span><span class="nt">&gt;</span>ELO world!<span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<p>…becomes:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">":8p"</span> <span class="na">class=</span><span class="s">"a3s aiL msg4142466614215349360"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;u&gt;&lt;/u&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"m_4142466614215349360body"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"m_4142466614215349360text"</span><span class="nt">&gt;</span>
+            ELO world!
+        <span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>With the CSS selector also adequatly being prefixed into:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.msg6240499631687324626</span> <span class="nt">u</span><span class="o">+</span><span class="nc">.m_6240499631687324626body</span> <span class="nc">.m_6240499631687324626text</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span><span class="no">green</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>So, going back to our code, we will move the two blend mode and background inline styles in a dedicated <code class="language-plaintext highlighter-rouge">&lt;style&gt;</code> element. (And we’ll make sure to have a doctype set and a <code class="language-plaintext highlighter-rouge">.body</code> class.)</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;style&gt;</span>
+    <span class="nt">u</span> <span class="o">+</span> <span class="nc">.body</span> <span class="nc">.gmail-blend-screen</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="m">#000</span><span class="p">;</span> <span class="py">mix-blend-mode</span><span class="p">:</span><span class="n">screen</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nt">u</span> <span class="o">+</span> <span class="nc">.body</span> <span class="nc">.gmail-blend-difference</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="m">#000</span><span class="p">;</span> <span class="py">mix-blend-mode</span><span class="p">:</span><span class="n">difference</span><span class="p">;</span> <span class="p">}</span>
+<span class="nt">&lt;/style&gt;</span>
+</code></pre></div></div>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#639; background-image:linear-gradient(#639,#639); color:#fff;"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"gmail-blend-screen"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"gmail-blend-difference"</span><span class="nt">&gt;</span>
+            Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>An unexpected but welcome side effect of separating the blend styles like this is that it gracefully falls back in the Gmail Apps with Non Google Accounts. In <abbr title="Gmail Apps with Non Google Accounts">GANGA</abbr> (as email geeks like to call it), <a href="https://www.caniemail.com/features/css-mix-blend-mode/"><code class="language-plaintext highlighter-rouge">mix-blend-mode</code> is not supported</a>. But <a href="https://www.caniemail.com/features/html-style/">neither are <code class="language-plaintext highlighter-rouge">&lt;style&gt;</code> elements</a>. So in that case, Gmail will just apply its regular color adjustment.</p>
+
+<h2 id="5-final-code">5. Final code</h2>
+
+<p>Here’s a full code example with everything up in place.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Fixing Gmail’s dark mode issues with CSS Blend Modes<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;style&gt;</span>
+        <span class="nt">u</span> <span class="o">+</span> <span class="nc">.body</span> <span class="nc">.gmail-blend-screen</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="m">#000</span><span class="p">;</span> <span class="py">mix-blend-mode</span><span class="p">:</span><span class="n">screen</span><span class="p">;</span> <span class="p">}</span>
+        <span class="nt">u</span> <span class="o">+</span> <span class="nc">.body</span> <span class="nc">.gmail-blend-difference</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="m">#000</span><span class="p">;</span> <span class="py">mix-blend-mode</span><span class="p">:</span><span class="n">difference</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body</span> <span class="na">class=</span><span class="s">"body"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"background:#639; background-image:linear-gradient(#639,#639); color:#fff;"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"gmail-blend-screen"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"gmail-blend-difference"</span><span class="nt">&gt;</span>
+                <span class="c">&lt;!-- Your content starts here --&gt;</span>
+                Lorem ipsum dolor, sit amet, consectetur adipisicing elit.
+                <span class="c">&lt;!-- Your content ends here --&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<p>I also made a sort of <a href="https://en.wikipedia.org/wiki/Test_card">test card</a> email to try out different background colors. You can find <a href="https://lab.hteumeuleu.com/dark-mode-blend/">the code here</a>.</p>
+
+<figure>
+    <a href="https://lab.hteumeuleu.com/dark-mode-blend/"><img alt="" src="/uploads/2021/04/gmail-ios-test-card.jpg" width="375" height="667" /></a>
+    <figcaption>A screenshot of a <a href="https://lab.hteumeuleu.com/dark-mode-blend/">test card</a> in Gmail iOS in dark mode. On top, with the fix, the white color and background colors are always maintained. On the bottom, without the fix, the colors are changed by Gmail.</figcaption>
+</figure>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I believe dark mode can be a major advancement in accessibility and user preference. And as I stated <a href="/2019/dealing-with-outlook-com-s-dark-mode/">two years ago</a>, “<em>the best you can do is to embrace this choice instead to try and go against it</em>”. But it’s also important to acknowledge when email clients mess up.</p>
+
+<p>I’m super excited to have come with this solution. And while it’s still limited (the blending limits it to white text only), I hope it’ll be of good help to anyone struggling with Gmail’s dark mode.</p>
+
+</div>
+		</main>
+		<footer class="footer" role="contentinfo">
+			<p><b>HTeuMeuLeu</b> <abbr title="also known as">aka</abbr> R&eacute;mi Parmentier.</p>
+			<p>Follow me on <a href="https://www.mastodon.social/@HTeuMeuLeu/">Mastodon</a>, <a href="https://www.github.com/HTeuMeuLeu/">GitHub</a> or <a href="https://www.youtube.com/c/HTeuMeuLeu/">Youtube</a>.</p>
+		</footer>
+	</div>
+</body>
+</html>
+
